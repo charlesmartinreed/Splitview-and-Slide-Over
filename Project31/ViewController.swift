@@ -71,8 +71,33 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         webView.addGestureRecognizer(recognizer)
     }
     
-    @objc func deleteWebView() {
-        
+    @objc func deleteWebView(_ webView: WKWebView) {
+        //delete button should only work if there's a web view selected
+        if let webView = activeWebView {
+            if let index = stackView.arrangedSubviews.index(of: webView) {
+                //find the location of the active web view inside the stack view, then remove it
+                stackView.removeArrangedSubview(webView)
+                
+                //remove from view hiearachy as well - when you remove something from an arranged stack view, it's hidden but not destroyed. We call this method to destroy it properly and avoid memory leaks.
+                webView.removeFromSuperview()
+                
+                //if no more web views, call setDefaultTitle to reset the user interface
+                if stackView.arrangedSubviews.count == 0 {
+                    setDefaultTitle()
+                } else {
+                    //find out whatever web view immediately follows the removed view and make THAT the selected web view
+                    var currentIndex = Int(index)
+                    
+                    if currentIndex == stackView.arrangedSubviews.count {
+                        currentIndex = stackView.arrangedSubviews.count - 1
+                    }
+                    
+                    if let newSelectedWebView = stackView.arrangedSubviews[currentIndex] as? WKWebView {
+                        selectWebView(newSelectedWebView)
+                    }
+                }
+            }
+        }
     }
     
     

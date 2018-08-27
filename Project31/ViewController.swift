@@ -33,6 +33,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         title = "Multibrowser"
     }
     
+    func updateUI(for webView: WKWebView) {
+        //in WebView: title = webView.stringByEvaluatingJavascript(from: "document.title")
+        title = webView.title
+        
+    }
+    
     //we need to detect when the user enters a new URL in the address bar
     //when the user presses return on their keyboard, this happens
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -46,6 +52,16 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         textField.resignFirstResponder()
         return true
         
+    }
+    
+    //MARK:- Size classes and resizing with multitasking support in iOS
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        if traitCollection.horizontalSizeClass == .compact {
+            //if the app is split in slide over or split view, set the stackView to distribute the subviews on a vertical axis
+            stackView.axis = .vertical
+        } else {
+            stackView.axis = .horizontal
+        }
     }
     
     @objc func addWebView() {
@@ -114,6 +130,15 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         //set our selected view, the caller, to have a visible border width
         activeWebView = webView
         webView.layer.borderWidth = 3
+        
+        updateUI(for: webView)
+    }
+    
+    //for changing the title after the page loads; ONLY if the page in question is actually the active web view
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        if webView == activeWebView {
+            updateUI(for: webView)
+        }
     }
     
     @objc func webViewTapped(_ recognizer: UITapGestureRecognizer) {
